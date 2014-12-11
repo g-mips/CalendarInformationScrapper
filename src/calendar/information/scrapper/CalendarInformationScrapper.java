@@ -203,6 +203,7 @@ public class CalendarInformationScrapper {
                         description = "";
                     }
                 } else {
+                    location = "";
                     description = "";
                 }
                 
@@ -224,6 +225,7 @@ public class CalendarInformationScrapper {
             if (itemNode.getNodeName().equals("pubDate")) {
                 String date = textNode.getNodeValue().substring(textNode.getNodeValue().indexOf(",")+2);
                 
+                // Get all the different parts of the date, \\s looks for spaces : looks for colons
                 String[] dateParts = date.split("[\\s:]");
                 String day = dateParts[0];
                 String month = dateParts[1];
@@ -232,24 +234,27 @@ public class CalendarInformationScrapper {
                 String minutes = dateParts[4];
                 String seconds = dateParts[5];
         
+                // Change the month from a word format to a number format
                 SimpleDateFormat monthAsDateFormat = new SimpleDateFormat("MMM");
                 Date monthAsDate = new Date();
 
                 try {
                     monthAsDate = monthAsDateFormat.parse(month);
-
                 } catch (ParseException ex) {
                     Logger.getLogger(CalendarInformationScrapper.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
+                // Get the month as a calendar
                 Calendar monthAsCalendar = new GregorianCalendar();
                 monthAsCalendar.setTime(monthAsDate);
 
+                // Final calendar to store everything
                 Calendar dateOfEvent = new GregorianCalendar(TimeZone.getTimeZone("MST"));
 
                 dateOfEvent.set(Integer.parseInt(year), monthAsCalendar.get(Calendar.MONTH), Integer.parseInt(day),
                                 Integer.parseInt(hour), Integer.parseInt(minutes), Integer.parseInt(seconds));
         
+                // Change from GMT to MST time.
                 dateOfEvent.add(Calendar.HOUR_OF_DAY, -7);
                 
                 event.setDate(dateOfEvent.get(Calendar.YEAR) + "-" + (dateOfEvent.get(Calendar.MONTH)+1) + "-" +
@@ -335,6 +340,8 @@ public class CalendarInformationScrapper {
         String endTime = "";
 
         // Are we dealing the a PM or AM time for start and end times?
+        // Yeah these two switch statements are dulpicate pieces of code.. just dealing with start and end times
+        // Didn't care to resolve the duplicate code, but if you want to go ahead.
         switch (startTimeParts[1]) {
             case "PM":
                 String hour = "";
@@ -388,6 +395,7 @@ public class CalendarInformationScrapper {
                 break;
         }
         
+        // When setting the times, make sure to tag on the seconds ":00"
         event.setStartTime(startTimeParts[0] + ":00");
         event.setEndTime(endTimeParts[0] + ":00");
     }
