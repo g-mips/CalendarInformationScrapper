@@ -91,7 +91,7 @@ public class DataBaseHandler {
                     
                     // Inserts all the calendars of the current event into the common lookup
                     for (String calendar : event.getCalendarList()) {
-                        sqlInsert = "INSERT INTO common_lookup (event_id, calender_name) VALUES ((SELECT event_id " +
+                        sqlInsert = "INSERT INTO common_lookup (event_id, calendar_name) VALUES ((SELECT event_id " +
                                     "FROM event WHERE (name = \"" + event.getTitle() +
                                     "\" AND date = \"" + event.getDate() + "\" AND start_time = \"" + event.getStartTime() + 
                                     "\" AND end_time = \"" + event.getEndTime() + "\" AND location = \"" +
@@ -156,6 +156,7 @@ public class DataBaseHandler {
     public void addCalendars(List<EventCalendar> calendars) {
         Connection connection = null;
         PreparedStatement statement = null;
+        PreparedStatement selectStatement = null;
         
         try {
             // Register JDBC driver
@@ -166,15 +167,26 @@ public class DataBaseHandler {
             connection = DriverManager.getConnection(DB_URL,USER,PASS);
 
             System.out.println("Creating statement...");
+            
+
+            
             String sqlInsert = "INSERT INTO calendar VALUES(?)";
             statement = connection.prepareStatement(sqlInsert);
 
             // Inserts all the possible calendars that an event can have into the calendar table
-            for (EventCalendar calendar : calendars) {
-                System.out.println("Inserting calendar: " + calendar.getNameOfCalendar());
+            for (EventCalendar calendar : calendars) { 
+                
+                //check if the calendar already exists in the database
+                String sqlSelect = "SELECT name FROM calendar WHERE name = \"" + calendar.getNameOfCalendar() + "\"";
+                selectStatement = connection.prepareStatement(sqlSelect);
+                ResultSet executeQuery = selectStatement.executeQuery();
+                
+                if(!executeQuery.next()){
+                    System.out.println("Inserting calendar: " + calendar.getNameOfCalendar());
 
-                statement.setString(1, calendar.getNameOfCalendar());
-                statement.executeUpdate();
+                    statement.setString(1, calendar.getNameOfCalendar());
+                    statement.executeUpdate();
+                }
             }
 
             statement.close();
