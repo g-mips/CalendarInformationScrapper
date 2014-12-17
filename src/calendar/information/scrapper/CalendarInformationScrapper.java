@@ -400,7 +400,7 @@ public class CalendarInformationScrapper {
      */
     public void sendToDatabase() throws FileNotFoundException, URISyntaxException {        
         DataBaseHandler eventAppDataBase = new DataBaseHandler(masterCalendar);
-        //eventAppDataBase.addCalendars(calendars);
+        eventAppDataBase.addCalendars(calendars);
         eventAppDataBase.writeToDataBase();
     }
     
